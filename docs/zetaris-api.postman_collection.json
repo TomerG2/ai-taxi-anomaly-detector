@@ -8,7 +8,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "{{idToken}}",
+				"value": "{{bearerToken}}",
 				"type": "string"
 			}
 		]
@@ -23,7 +23,7 @@
 			"value": "1"
 		},
 		{
-			"key": "idToken",
+			"key": "bearerToken",
 			"value": ""
 		},
 		{
@@ -55,61 +55,67 @@
 	],
 	"item": [
 		{
-			"name": "Login",
-			"event": [
+			"name": "Auth Helpers",
+			"description": "JWT login and token refresh. Skip these when using API key authentication — set bearerToken in your Postman environment instead.",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"if (pm.response.code === 200) {",
-							"    var body = pm.response.json();",
-							"    pm.collectionVariables.set('idToken', body.idToken);",
-							"    pm.collectionVariables.set('refreshToken', body.refreshToken);",
-							"}"
-						]
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var body = pm.response.json();",
+									"    pm.collectionVariables.set('bearerToken', body.idToken);",
+									"    pm.collectionVariables.set('refreshToken', body.refreshToken);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{ "key": "username", "value": "dev@account.com", "type": "string" },
+								{ "key": "password", "value": "<your-password>", "type": "string" }
+							]
+						},
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1.0/auth/login"
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var body = pm.response.json();",
+									"    pm.collectionVariables.set('bearerToken', body.idToken);",
+									"    pm.collectionVariables.set('refreshToken', body.refreshToken);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{ "key": "token", "value": "{{refreshToken}}", "type": "string" }
+							]
+						},
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1.0/auth/refresh"
 					}
 				}
-			],
-			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": [
-						{ "key": "username", "value": "dev@account.com", "type": "string" },
-						{ "key": "password", "value": "<your-password>", "type": "string" }
-					]
-				},
-				"method": "GET",
-				"url": "{{baseUrl}}/api/v1.0/auth/login"
-			}
-		},
-		{
-			"name": "Refresh Token",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"if (pm.response.code === 200) {",
-							"    var body = pm.response.json();",
-							"    pm.collectionVariables.set('idToken', body.idToken);",
-							"    pm.collectionVariables.set('refreshToken', body.refreshToken);",
-							"}"
-						]
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{ "key": "token", "value": "{{refreshToken}}", "type": "string" }
-					]
-				},
-				"method": "GET",
-				"url": "{{baseUrl}}/api/v1.0/auth/refresh"
-			}
+			]
 		},
 		{
 			"name": "OpenSqlQuery",
